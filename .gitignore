@@ -1,0 +1,12 @@
+# Ejecutables compilados
+MiniSO
+
+# Archivos objeto
+*.o
+
+# Archivos temporales
+*~
+*.swp
+
+# Configuracion local del editor
+.vscode/
