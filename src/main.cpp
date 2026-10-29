@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include "procesos.h"
 
 using namespace std;
 
@@ -33,7 +34,7 @@ int main()
         switch (opcion)
         {
             case 1:
-                cout << "\nModulo de procesos en desarrollo." << endl;
+                menuProcesos();
                 break;
 
             case 2:
