@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 #include "procesos.h"
+#include "hilos.h"
 
 using namespace std;
 
@@ -38,7 +39,7 @@ int main()
                 break;
 
             case 2:
-                cout << "\nModulo de hilos en desarrollo." << endl;
+                menuHilos();
                 break;
 
             case 3:
