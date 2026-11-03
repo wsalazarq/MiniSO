@@ -3,8 +3,54 @@
 #include <unistd.h>
 #include <cstdio>
 #include "procesos.h"
+#include <string>
 
 using namespace std;
+
+void verPs()
+{
+    string str = to_string(getpid());
+
+    pid_t pid = fork();
+
+    if (pid < 0){
+        perror("Error al crear proceso para ps");
+    }
+    else if (pid == 0){
+        execl("/bin/ps", "ps",
+              "-o", "pid,ppid,stat,cmd",
+              "--ppid", str.c_str(),
+              "-p", str.c_str(),
+              (char *)NULL);
+
+        perror("Error al ejecutar ps");
+        _exit(1);
+    }
+    else{
+        waitpid(pid, NULL, 0);
+    }
+}
+
+void verPstree()
+{
+    string str = to_string(getpid());
+
+    pid_t pid = fork();
+
+    if (pid < 0){
+        perror("Error al crear proceso para pstree");
+    }
+    else if (pid == 0){
+        execl("/usr/bin/pstree", "pstree",
+              "-p", str.c_str(), (char *)NULL);
+
+        perror("Error al ejecutar pstree");
+        _exit(1);
+    }
+    else{
+        waitpid(pid, NULL, 0);
+    }
+}
 
 void mostrarMenuProgramas()
 {
@@ -106,6 +152,14 @@ void crearProcesos(){
         }
     }
     
+    cout << "\n===== VERIFICACION DE PROCESOS CON LINUX =====" << endl;
+
+    cout << "\n--- Procesos vistos con ps ---" << endl;
+    verPs();
+
+    cout << "\n--- Arbol de procesos con pstree ---" << endl;
+    verPstree();
+
     cout << "\n[PADRE] Esperando la finalizacion de los hijos..." << endl;
 
     // Esperar por cada hijo específico
