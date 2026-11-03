@@ -1,7 +1,7 @@
 #include <iostream>
 #include <limits>
 #include "procesos.h"
-
+#include "memoria.h" 
 using namespace std;
 
 void mostrarMenu()
@@ -42,7 +42,7 @@ int main()
                 break;
 
             case 3:
-                cout << "\nModulo de memoria en desarrollo." << endl;
+                menuMemoria();
                 break;
 
             case 4:
