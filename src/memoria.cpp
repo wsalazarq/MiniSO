@@ -8,12 +8,12 @@ using namespace std;
 
 struct BloqueMemoria
 {
-    int inicio;
-    int tamano;
-    bool ocupado;
-    int idProceso;
+    int inicio;  //direccion inicial
+    int tamano;  //cantidad memoria ocupada
+    bool ocupado;  //indicador del estado bloque
+    int idProceso;  
 };
-
+//lista de almacenamiento 
 vector<BloqueMemoria> memoria;
 
 bool memoriaInicializada = false;
@@ -70,15 +70,15 @@ void inicializarMemoria()
     }
 
     memoria.clear();
-
+    //Crea bloque memoria en estado libre
     BloqueMemoria bloqueInicial;
 
-    bloqueInicial.inicio = 0;
-    bloqueInicial.tamano = tamanoTotal;
+    bloqueInicial.inicio = 0;  //direccion
+    bloqueInicial.tamano = tamanoTotal;  
     bloqueInicial.ocupado = false;
     bloqueInicial.idProceso = -1;
 
-    memoria.push_back(bloqueInicial);
+    memoria.push_back(bloqueInicial);  //añade lista vector
 
     memoriaInicializada = true;
     siguienteIdProceso = 1;
@@ -116,23 +116,24 @@ void solicitarBloque()
         cout << "\nError: el tamano debe ser mayor que cero." << endl;
         return;
     }
-
+    
+    // Recorrer los bloques desde el inicio (First-Fit)
     for (size_t i = 0; i < memoria.size(); i++)
     {
         if (!memoria[i].ocupado && memoria[i].tamano >= tamanoSolicitado)
         {
             int id = siguienteIdProceso++;
-
+            // Crear un bloque ocupado para el proceso
             BloqueMemoria nuevoBloque;
 
             nuevoBloque.inicio = memoria[i].inicio;
             nuevoBloque.tamano = tamanoSolicitado;
             nuevoBloque.ocupado = true;
             nuevoBloque.idProceso = id;
-
+             // Reducir el espacio del bloque libre
             memoria[i].inicio += tamanoSolicitado;
             memoria[i].tamano -= tamanoSolicitado;
-
+            // Inserta el bloque ocupado 
             memoria.insert(memoria.begin() + i, nuevoBloque);
 
             cout << "\nMemoria asignada correctamente." << endl;
@@ -167,7 +168,7 @@ void liberarBloque()
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         return;
     }
-
+    //Se inicia la busqueda del proceso solicitado
     for (size_t i = 0; i < memoria.size(); i++)
     {
         if (memoria[i].ocupado && memoria[i].idProceso == idProceso)
@@ -195,14 +196,15 @@ void unirBloquesLibres()
     }
 
     int i = 0;
-
+    
     while (i < (int)memoria.size() - 1)
     {
+        // Comprueba si existen dos bloques consecutivos libres
         if (!memoria[i].ocupado && !memoria[i + 1].ocupado)
         {
             memoria[i].tamano += memoria[i + 1].tamano;
-
-            memoria.erase(memoria.begin() + i + 1);
+            
+            memoria.erase(memoria.begin() + i + 1);  //elimina segundo bloque
         }
         else
         {
@@ -261,7 +263,7 @@ void mostrarFragmentacionExterna()
         return;
     }
 
-    int memoriaLibre = 0;
+    int memoriaLibre = 0; //cantidad total memoria libre
     int bloqueLibreMayor = 0;
     int cantidadBloquesLibres = 0;
 
