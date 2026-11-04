@@ -2,6 +2,7 @@
 #include <limits>
 #include "procesos.h"
 #include "hilos.h"
+#include "memoria.h"
 
 using namespace std;
 
@@ -43,7 +44,7 @@ int main()
                 break;
 
             case 3:
-                cout << "\nModulo de memoria en desarrollo." << endl;
+                menuMemoria();
                 break;
 
             case 4:

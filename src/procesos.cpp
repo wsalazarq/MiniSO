@@ -1,7 +1,186 @@
 #include <iostream>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <cstdio>
 #include "procesos.h"
+#include <string>
 
 using namespace std;
+
+void verPs()
+{
+    string str = to_string(getpid());
+
+    pid_t pid = fork();
+
+    if (pid < 0){
+        perror("Error al crear proceso para ps");
+    }
+    else if (pid == 0){
+        execl("/bin/ps", "ps",
+              "-o", "pid,ppid,stat,cmd",
+              "--ppid", str.c_str(),
+              "-p", str.c_str(),
+              (char *)NULL);
+
+        perror("Error al ejecutar ps");
+        _exit(1);
+    }
+    else{
+        waitpid(pid, NULL, 0);
+    }
+}
+
+void verPstree()
+{
+    string str = to_string(getpid());
+
+    pid_t pid = fork();
+
+    if (pid < 0){
+        perror("Error al crear proceso para pstree");
+    }
+    else if (pid == 0){
+        execl("/usr/bin/pstree", "pstree",
+              "-p", str.c_str(), (char *)NULL);
+
+        perror("Error al ejecutar pstree");
+        _exit(1);
+    }
+    else{
+        waitpid(pid, NULL, 0);
+    }
+}
+
+void mostrarMenuProgramas()
+{
+    cout << "\n===== PROGRAMAS DISPONIBLES =====" << endl;
+    cout << "1. Mostrar un mensaje (echo)" << endl;
+    cout << "2. Listar archivos y directorios (ls)" << endl;
+    cout << "3. Mostrar fecha y hora (date)" << endl;
+    cout << "4. Esperar 5 segundos (sleep)" << endl;
+    cout << "5. Mostrar informacion del sistema (uname)" << endl;
+    cout << "6. Mostrar usuario actual (whoami)" << endl;
+    cout << "7. Mostrar uso de memoria RAM (free)" << endl;
+    cout << "8. Mostrar ruta del directorio actual (pwd)" << endl;
+}
+
+void ejecutarPrograma(int opcion)
+{
+    switch (opcion)
+    {
+        case 1:
+            execl("/bin/echo", "echo", "Hola desde un proceso hijo", (char *)NULL);
+            break;
+        case 2:
+            execl("/bin/ls", "ls", "-l", (char *)NULL);
+            break;
+        case 3:
+            execl("/bin/date", "date", (char *)NULL);
+            break;
+        case 4:
+            execl("/bin/sleep", "sleep", "5", (char *)NULL);
+            break;
+        case 5:
+            execl("/bin/uname", "uname", "-a", (char *)NULL);
+            break;
+        case 6:
+            execl("/usr/bin/whoami", "whoami", (char *)NULL);
+            break;
+        case 7:
+            execl("/usr/bin/free", "free", "-h", (char *)NULL);
+            break;
+        case 8:
+            execl("/bin/pwd", "pwd", (char *)NULL);
+            break;
+        default:
+            _exit(1);
+    }
+
+    perror("[HIJO] Error al ejecutar exec");
+    _exit(1);
+}
+
+void crearProcesos(){
+    int numeroHijos;
+
+    cout << "\n¿Cuantos procesos hijos desea crear? (1-10): ";
+    cin >> numeroHijos;
+
+    if (cin.fail() || numeroHijos < 1 || numeroHijos > 10){
+        cout << "Cantidad no valida. Ingrese un numero entre 1 y 10." << endl;
+        cin.clear();
+        cin.ignore(1000, '\n');
+        return;
+    }
+
+    mostrarMenuProgramas();
+
+    int opcionPrograma;
+    cout << "\nSeleccione el programa: ";
+    cin >> opcionPrograma;
+
+    if (cin.fail() || opcionPrograma < 1 || opcionPrograma > 8){
+        cout << "Opcion no valida." << endl;
+        cin.clear();
+        cin.ignore(1000, '\n');
+        return;
+    }
+
+    pid_t hijos[10];
+    int cantidad = 0;
+
+    cout << "\n[PADRE] Mi PID es: " << getpid() << endl;
+
+    // Creaciones de procesos hijos
+    for (int i = 0; i < numeroHijos; i++){
+        pid_t pid = fork();
+
+        if (pid < 0){
+            perror("[PADRE] Error al crear proceso hijo");
+            break;
+        }
+        else if (pid == 0){
+            cout << "\n[HIJO " << i + 1 << "] PID: " << getpid() << " | PPID: " << getppid() << endl;
+            cout << "[HIJO " << i + 1 << "] Ejecutando programa..." << endl;
+            
+            ejecutarPrograma(opcionPrograma);
+        }
+        else{
+            hijos[cantidad++] = pid;
+            cout << "[PADRE] Se creo el hijo #" << cantidad << " con PID: " << pid << endl;
+        }
+    }
+    
+    cout << "\n===== VERIFICACION DE PROCESOS CON LINUX =====" << endl;
+
+    cout << "\n--- Procesos vistos con ps ---" << endl;
+    verPs();
+
+    cout << "\n--- Arbol de procesos con pstree ---" << endl;
+    verPstree();
+
+    cout << "\n[PADRE] Esperando la finalizacion de los hijos..." << endl;
+
+    // Esperar por cada hijo específico
+    for (int i = 0; i < cantidad; i++)
+    {
+        int estado;
+        pid_t resultado = waitpid(hijos[i], &estado, 0);
+
+        if (resultado == -1){
+            perror("[PADRE] Error al esperar al proceso hijo");
+        }
+        else if (WIFEXITED(estado)){
+            cout << "[PADRE] Hijo " << resultado << " finalizo con codigo: " << WEXITSTATUS(estado) << endl;
+        }
+        else if (WIFSIGNALED(estado)){
+            cout << "[PADRE] El hijo " << resultado << " termino por una senal: " << WTERMSIG(estado) << endl;
+        }
+    }
+
+    cout << "\n[PADRE] Todos los hijos finalizaron." << endl;
+}
 
 void menuProcesos()
 {
@@ -13,7 +192,6 @@ void menuProcesos()
         cout << "1. Crear y ejecutar procesos hijos" << endl;
         cout << "2. Volver al menu principal" << endl;
         cout << "Seleccione una opcion: ";
-
         cin >> opcion;
 
         if (cin.fail())
@@ -25,10 +203,9 @@ void menuProcesos()
             continue;
         }
 
-        switch (opcion)
-        {
+        switch (opcion){
             case 1:
-                cout << "\nEn proceso de implementacion..." << endl;
+                crearProcesos();
                 break;
 
             case 2:
@@ -36,7 +213,7 @@ void menuProcesos()
                 break;
 
             default:
-                cout << "\nOpcion no valida" << endl;
+                cout << "\nOpcion no valida." << endl;
         }
 
     } while (opcion != 2);
