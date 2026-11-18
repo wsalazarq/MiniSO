@@ -67,3 +67,7 @@ MiniSO/
 ## Desarrollo
 
 El proyecto se desarrolla de manera colaborativa utilizando Git y GitHub, mediante ramas de trabajo y commits que registran las distintas etapas de implementación, integración y validación.
+
+## Videos de demostración
+
+- **Willian Arturo Salazar Quispe (Módulo I - Gestión de procesos):** https://www.youtube.com/watch?v=DKA2JHDtzs8
