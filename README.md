@@ -71,3 +71,4 @@ El proyecto se desarrolla de manera colaborativa utilizando Git y GitHub, median
 ## Videos de demostración
 
 - **Willian Arturo Salazar Quispe (Módulo I - Gestión de procesos):** https://www.youtube.com/watch?v=DKA2JHDtzs8
+- **Diana Belinda Mamani Ramos (Módulo III - Gestión de memoria):** https://www.youtube.com/watch?v=yD5JJ0QkOMo
